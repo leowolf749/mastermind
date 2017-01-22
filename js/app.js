@@ -1,42 +1,27 @@
+/**
+ * Separation of concerns
+ * 
+ * Big applications get way, way harder if everything is related to everything else.
+ * You can avoid this by somehow 'separating' similar things from unrelated things.
+ */
+const MastermindModel = require('./models/mastermind');
+const MastermindView = require('./views/mastermind');
+
+/* First, create a model. */
+// let MastermindModel = 
+
+/* Then work through how to display + interact with the model. */
+// let IngredientView = 
+
 window.addEventListener('load', function () {
-    
-    let checkParam = new RegExp('^[1-8][1-8][1-8][1-8]$');
+    let mastermind = new MastermindModel();
 
-    let guess = document.querySelector('#guess');
-
-    let check = document.querySelector('#check');
-    check.addEventListener('click', function () {
-         console.log('ready');
-
-
-         if(checkParam.test(guess.value)) {
-             let array = [];
-             let currentGuess = guess.value;
-
-             for (let i = 0; i < currentGuess.length; i++) {
-                 let nums = parseInt(currentGuess[i]);
-                 array.push(nums);
-             }
-             console.log(array);
-
-                sendGuess(currentGuess);
-    
-
-         } else {
-             console.log('not working');
-         }
+    let mainView = new MastermindView({
+        /* 
+        The 'kingdom' the view is in charge of. All elements within this element 
+        are solely controlled by this view. 
+        */
+        el: document.querySelector('body'), // el = element
+        model: mastermind, // model = the model to update when times are changing
     });
-   
 });
-// won't need this once Backbone is implemented
-function sendGuess(guess) {
-    let request = new XMLHttpRequest();
-    request.open('POST', 'url');
-
-    let body = JSON.stringify({
-        guess,
-    });
-    request.send(body);
-    console.log('yo');
-}
-
