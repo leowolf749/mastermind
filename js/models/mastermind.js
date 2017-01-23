@@ -7,22 +7,25 @@ Backbone.sync = function (method, model) {
     if (method === 'create' || method === 'update') {
         // some way for your model to know whether youre doing a new game 
         // request or updating an existing ongoing game
-        if (model.get("turns") === 0) {
-            const request = new XMLHttpRequest();
+        if (model.get("turn") === 0) {
+            console.log('NEW GAME');
+            // const request = new XMLHttpRequest();
             // do new game stuff
         } else {
             const request = new XMLHttpRequest();
-            request.open('POST', 'https://peapalace.org');
+            request.open('POST', 'http://dry-depths-93139.herokuapp.com/guess');
             request.addEventListener('load', function () {
                 const response = JSON.parse(request.responseText);
 
                 // this is what happens when you get a response.
-                model.set('carrots', response.carrots);
+                model.set('turn', response.turn);
+                model.set('guesses', response.guesses);
                 model.trigger('change'); // re-render, make sure to call this.
             });
 
             const body = JSON.stringify({
-                peas: model.get('peas'),
+                turn: model.get('turn'),
+                guesses: model.get('guesses'),
             });
             request.send(body); // pass a json string here
         }
@@ -32,30 +35,44 @@ Backbone.sync = function (method, model) {
 module.exports = Backbone.Model.extend({
     /* Built-in to Backbone. These are the starting values for each property */
     defaults: {
-        peas: 100,
-        carrots: 0,
+        turn: 0,
+        guesses: [],
     },
 
-    reset() {
-        this.set('turns', 0);
-        this.save();
+    resetModel: function () {
+        this.set('turn', 0);
+        this.set('guesses', []);
     },
 
-    /* Increase the number of peas by one. Max 115 because reasons. */
-    increasePeas: function () {
-        // this.peas = this.peas + 1;
-        // this.get('peas');            // get the value of 'peas'
-        // this.set('peas', 5);         // set number of peas to 5
-        if (this.get('peas') < 115) {
-            this.set('peas', this.get('peas') + 1); // increase number of peas by 1
-            this.save(); // function built in to all models
+    // reset() {
+    //     this.set('turns', 0);
+    //     this.save();
+    // },
 
-            // someone clicks increase button (view handler => model handler)
-            // model increments # of peas
-            // save() - sends the update to the server
-            // when we get a response, update the model again
+    guess: function (guess) {
+        let checkParam = new RegExp('^[1-8][1-8][1-8][1-8]$');
+            
+        if(checkParam.test(guess.value)) {
+            let array = [];
+            let allGuesses = this.get('guesses');
+            let currentGuess = guess.value;
+
+            for (let i = 0; i < currentGuess.length; i++) {
+                let nums = parseInt(currentGuess[i]);
+                array.push(nums);
+            }
+            console.log(array);
+        
+            allGuesses.push(array);
+            this.set('guesses', allGuesses);
+        
+            this.save();
+
+        } else {
+            alert('Invalid input!\nGuess four numbers from 1-8!');
         }
-    },
+        this.trigger('change');
+    }
 });
 
 
@@ -63,6 +80,7 @@ module.exports = Backbone.Model.extend({
 
 
 
+// *** OLD CODE *** //
 
 // window.addEventListener('load', function () {
 
